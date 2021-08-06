@@ -25,6 +25,7 @@ import subprocess
 import traceback
 import glob
 import hashlib
+import urllib
 from urllib.request import urlopen, ContentTooShortError
 from urllib.error import URLError
 import contextlib
@@ -774,9 +775,13 @@ class Builder(object):
             # let the library does the work
             ssl_ctx = None
 
-        msg = 'Opening %s ...' % (url, )
+        msg = 'Opening url %s ...' % (url, )
+        proxy = urllib.request.ProxyHandler({'http': 'http://127.0.0.1:10809',
+                                             'https': 'https://127.0.0.1:10809'})
+        opener = urllib.request.build_opener(proxy)
+        urllib.request.install_opener(opener)
         print(msg, end='\r')
-        with contextlib.closing(urlopen(url, None, context=ssl_ctx)) as fp:
+        with contextlib.closing(urllib.request.urlopen(url, None, context=ssl_ctx, timeout=10)) as fp:
             print('%*s' % (len(msg), '', ), end = '\r')
             headers = fp.info()
 
